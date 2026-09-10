@@ -17,7 +17,8 @@ export default function Page() {
           <p
             className={`${lusitana.className} text-xl text-gray-800 antialiased md:text-3xl md:leading-normal`}
           >
-            <strong>Welcome to ACME.</strong> <br />
+            <strong>Welcome to the financial dashboard application.</strong>{' '}
+            <br />
             Manage customers, invoices, projects, and operational workflows from
             a unified financial operation platform.
           </p>
