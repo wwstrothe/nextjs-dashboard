@@ -2,6 +2,7 @@ import { lusitana } from '@/app/ui/fonts';
 import {
   BanknotesIcon,
   ClockIcon,
+  ExclamationCircleIcon,
   InboxIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
@@ -10,6 +11,7 @@ const iconMap = {
   collected: BanknotesIcon,
   customers: UserGroupIcon,
   pending: ClockIcon,
+  late: ExclamationCircleIcon,
   invoices: InboxIcon,
 };
 
