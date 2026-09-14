@@ -61,7 +61,8 @@ export async function fetchCardData() {
     const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
     const invoiceStatusPromise = sql`SELECT
                 SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
-                SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
+                SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending",
+                SUM(CASE WHEN status = 'late' THEN amount ELSE 0 END) AS "late"
                 FROM invoices`;
 
     const data = await Promise.all([
@@ -76,12 +77,14 @@ export async function fetchCardData() {
     const numberOfCustomers = Number(data[1][0].count ?? '0');
     const totalPaidInvoices = formatCurrency(data[2][0].paid ?? '0');
     const totalPendingInvoices = formatCurrency(data[2][0].pending ?? '0');
+    const totalLateInvoices = formatCurrency(data[2][0].late ?? '0');
 
     return {
       numberOfCustomers,
       numberOfInvoices,
       totalPaidInvoices,
       totalPendingInvoices,
+      totalLateInvoices,
     };
   } catch (error) {
     console.error('Database Error:', error);
@@ -200,7 +203,8 @@ export async function fetchFilteredCustomers(query) {
               customers.image_url,
               COUNT(invoices.id) AS total_invoices,
               SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
-              SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
+              SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid,
+              SUM(CASE WHEN invoices.status = 'late' THEN invoices.amount ELSE 0 END) AS total_late
             FROM customers
             LEFT JOIN invoices ON customers.id = invoices.customer_id
             WHERE
@@ -214,12 +218,29 @@ export async function fetchFilteredCustomers(query) {
       ...customer,
       total_pending: formatCurrency(customer.total_pending),
       total_paid: formatCurrency(customer.total_paid),
+      total_late: formatCurrency(customer.total_late),
     }));
 
     return customers;
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch customer table.');
+  }
+}
+
+export async function fetchCustomerById(id) {
+  noStore();
+  try {
+    const data = await sql`
+              SELECT id, name, email, image_url
+              FROM customers
+              WHERE id = ${id};
+            `;
+
+    return data[0];
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch customer.');
   }
 }
 
